@@ -13,6 +13,10 @@ type BootCtx = {
   temp: number;
   gridCtl: string;
   voidSt: string;
+  signal: string;
+  gridNodes: string;
+  topoCache: string;
+  rfGrid: string;
 };
 
 type BootStep = {
@@ -23,23 +27,6 @@ type BootStep = {
   typeSpeed?: number;
   effect?: "corr" | "armed" | "units" | "diag";
   render?: (ctx: BootCtx) => React.ReactNode;
-};
-
-type BootCtx = {
-  armed1: number;
-  armed2: number;
-  corrOn: boolean;
-  unit3: number;
-  resA: number;
-  resB: number;
-  resU: number;
-  temp: number;
-  gridCtl: string;
-  voidSt: string;
-  signal: string;
-  gridNodes: string;
-  topoCache: string;
-  rfGrid: string;
 };
 
 type StatusRow = { label: string; val: string; cls: "pass" | "fail" | "null" };
