@@ -3,6 +3,7 @@ import Link from "next/link";
 import { hubImages, site } from "@/data/site";
 
 const LINKS = [
+  { label: "Shop", href: "/shop", external: false },
   { label: "Instagram", href: site.instagram, external: true },
   { label: "Presentation", href: "/presentation", external: false },
   { label: "Contact", href: `mailto:${site.email}`, external: true },
@@ -41,6 +42,7 @@ export function Hub() {
               width={img.width}
               height={img.height}
               priority
+              sizes="(max-width: 720px) 100vw, 33vw"
               className="hub-img"
             />
           ))}
