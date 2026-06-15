@@ -14,8 +14,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = getProductById(id);
   if (!product) return { title: "Product | ZONA" };
   return {
-    title: `${product.name} | ZONA`,
-    description: product.description,
+    title: `${product.copy.es.name} | ZONA`,
+    description: product.copy.es.description,
   };
 }
 

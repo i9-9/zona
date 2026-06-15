@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { LangToggle } from "@/components/LangToggle";
 import { hubImages, site } from "@/data/site";
 
 const LINKS = [
@@ -27,24 +30,28 @@ export function Hub() {
             <span className="hub-tag">GZ-01 / HUB</span>
             <span className="hub-tag hub-tag-dim">{site.location}</span>
           </div>
-          <div className="hub-header-right">
-            <span className="hub-tag hub-tag-live">● ONLINE</span>
-            <span className="hub-tag hub-tag-dim">34.60°S 58.38°W</span>
+          <div className="hub-header-actions">
+            <LangToggle />
+            <div className="hub-header-right">
+              <span className="hub-tag hub-tag-live">● ONLINE</span>
+              <span className="hub-tag hub-tag-dim">34.60°S 58.38°W</span>
+            </div>
           </div>
         </header>
 
         <div className="hub-visual">
           {hubImages.map((img) => (
-            <Image
-              key={img.src}
-              src={img.src}
-              alt={img.alt}
-              width={img.width}
-              height={img.height}
-              priority
-              sizes="(max-width: 720px) 100vw, 33vw"
-              className="hub-img"
-            />
+            <div key={img.src} className="hub-visual-item">
+              <Image
+                src={img.src}
+                alt={img.alt}
+                width={img.width}
+                height={img.height}
+                priority
+                sizes="(max-width: 720px) 100vw, 33vw"
+                className="hub-img"
+              />
+            </div>
           ))}
         </div>
 

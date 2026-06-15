@@ -1,71 +1,68 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { orderMail, type Product } from "@/data/products";
-import { site } from "@/data/site";
+import { useRouter } from "next/navigation";
+import { getProductCopy, type Product } from "@/data/products";
+import { t } from "@/data/i18n/shop";
+import { useShop } from "@/context/ShopContext";
+import { useLang } from "@/context/LangContext";
+import { Price, ShopShell } from "@/components/ShopShell";
 
 export function ProductPage({ product }: { product: Product }) {
+  const { lang } = useLang();
+  const { addToCart } = useShop();
+  const copy = t(lang);
+  const pc = getProductCopy(product, lang);
+  const router = useRouter();
+
+  const handleAdd = () => {
+    addToCart(product.id);
+    router.push("/shop/cart");
+  };
+
   return (
-    <main className="hub shop">
-      <div className="hub-glitch-band hub-glitch-top" aria-hidden="true" />
-
-      <div className="hub-shell shop-shell">
-        <header className="hub-header">
-          <div className="hub-header-left">
-            <span className="hub-tag">GZ-01 / SHOP</span>
-            <span className="hub-tag hub-tag-dim">{product.code}</span>
+    <ShopShell tag={product.code} backHref="/shop" backLabel={copy.backShop}>
+      <div className="shop-panel product-panel">
+        <div className="product-layout">
+          <div className="product-visual">
+            <Image
+              src={product.image}
+              alt={pc.name}
+              width={product.imageWidth}
+              height={product.imageHeight}
+              priority
+              sizes="(max-width: 720px) 100vw, 50vw"
+              className="product-img"
+            />
           </div>
-          <Link href="/shop" className="hub-tag shop-back">
-            ← SHOP
-          </Link>
-        </header>
 
-        <div className="shop-panel product-panel">
-          <div className="product-layout">
-            <div className="product-visual">
-              <Image
-                src={product.image}
-                alt={product.name}
-                width={product.imageWidth}
-                height={product.imageHeight}
-                priority
-                sizes="(max-width: 720px) 100vw, 50vw"
-                className="product-img"
-              />
-            </div>
+          <div className="product-info">
+            <p className="shop-item-code">{product.code}</p>
+            <h1 className="product-name">{pc.name}</h1>
+            <p className="product-price">
+              <Price amount={product.priceAmount} />
+            </p>
+            <p className="product-desc">{pc.description}</p>
 
-            <div className="product-info">
-              <p className="shop-item-code">{product.code}</p>
-              <h1 className="product-name">{product.name}</h1>
-              <p className="product-price">{product.price}</p>
-              <p className="product-desc">{product.description}</p>
+            <ul className="product-details">
+              {pc.details.map((d) => (
+                <li key={d}>{d}</li>
+              ))}
+            </ul>
 
-              <ul className="product-details">
-                {product.details.map((d) => (
-                  <li key={d}>{d}</li>
-                ))}
-              </ul>
+            <p className="product-shipping-note">{copy.shippingNote}</p>
 
-              {product.status === "available" ? (
-                <a href={orderMail(product)} className="shop-order product-order">
-                  [ PEDIR ]
-                </a>
-              ) : (
-                <span className="shop-sold">SOLD OUT</span>
-              )}
-            </div>
+            {product.status === "available" ? (
+              <button type="button" onClick={handleAdd} className="shop-order product-order">
+                {copy.addToCart}
+              </button>
+            ) : (
+              <span className="shop-sold">{copy.soldOut}</span>
+            )}
           </div>
         </div>
-
-        <footer className="hub-footer shop-footer">
-          <span>{site.location}</span>
-          <div className="hub-footer-bar">
-            <div className="hub-footer-fill" />
-          </div>
-          <span>{product.status === "available" ? "IN STOCK" : "UNAVAILABLE"}</span>
-        </footer>
       </div>
-
-      <div className="hub-glitch-band hub-glitch-bottom" aria-hidden="true" />
-    </main>
+    </ShopShell>
   );
 }

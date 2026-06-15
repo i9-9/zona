@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import { LangToggle } from "@/components/LangToggle";
+import { useLang } from "@/context/LangContext";
 import { slides, type Slide } from "@/data/slides";
 
 const SLIDE_COUNT = slides.length;
@@ -136,10 +138,12 @@ function SlideContent({
   slide,
   index,
   isActive,
+  thankYou,
 }: {
   slide: Slide;
   index: number;
   isActive: boolean;
+  thankYou: string;
 }) {
   const base = "h-full shrink-0 flex flex-col items-center justify-center px-8 relative";
   const slideWidth = "100vw";
@@ -261,7 +265,7 @@ function SlideContent({
         <div className={base} style={{ width: slideWidth }}>
           <div className="text-left">
             <h2 className="text-4xl md:text-5xl font-bold [font-family:var(--font-display)]">
-              Gracias
+              {thankYou}
             </h2>
           </div>
         </div>
@@ -274,6 +278,8 @@ function SlideContent({
 
 export function Presentation() {
   const [current, setCurrent] = useState(0);
+  const { lang } = useLang();
+  const thankYou = lang === "es" ? "Gracias" : "Thank you";
 
   const go = useCallback(
     (delta: number) => {
@@ -308,6 +314,10 @@ export function Presentation() {
 
   return (
     <div className="relative h-screen w-screen max-w-full overflow-hidden bg-[var(--slide-dark)] text-[var(--slide-dark-fg)]">
+      <div className="absolute top-6 right-6 z-30">
+        <LangToggle className="lang-toggle lang-toggle-overlay" />
+      </div>
+
       {/* Controles: fondo oscuro para buen contraste en slides negras, blancas o con imagen */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 bg-black/75 backdrop-blur-sm px-4 py-2 rounded-full border border-white/10">
         <button
@@ -366,6 +376,7 @@ export function Presentation() {
             slide={slide}
             index={index}
             isActive={current === index}
+            thankYou={thankYou}
           />
         ))}
       </div>

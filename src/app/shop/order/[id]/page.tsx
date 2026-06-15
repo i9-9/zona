@@ -1,0 +1,8 @@
+import { OrderConfirmationPage } from "@/components/OrderConfirmationPage";
+
+type Props = { params: Promise<{ id: string }> };
+
+export default async function Page({ params }: Props) {
+  const { id } = await params;
+  return <OrderConfirmationPage orderId={id} />;
+}

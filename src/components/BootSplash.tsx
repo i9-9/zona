@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { LangToggle } from "@/components/LangToggle";
 
 type BootCtx = {
   armed1: number;
@@ -381,7 +382,13 @@ function StreamLine({
   );
 }
 
-export function BootSplash({ onComplete }: { onComplete: () => void }) {
+export function BootSplash({
+  onComplete,
+  assetsReady,
+}: {
+  onComplete: () => void;
+  assetsReady: boolean;
+}) {
   const sequence = BOOT_SEQUENCE;
   const [lineIndex, setLineIndex] = useState(0);
   const [bootPct, setBootPct] = useState(0);
@@ -389,6 +396,7 @@ export function BootSplash({ onComplete }: { onComplete: () => void }) {
   const [skipEnabled, setSkipEnabled] = useState(false);
   const [done, setDone] = useState(false);
   const [finishing, setFinishing] = useState(false);
+  const [sequenceDone, setSequenceDone] = useState(false);
 
   const [ctx, setCtx] = useState<BootCtx>({
     armed1: 0,
@@ -414,10 +422,16 @@ export function BootSplash({ onComplete }: { onComplete: () => void }) {
 
   const finish = useCallback(() => {
     if (finishing) return;
+    setSequenceDone(true);
+    if (!assetsReady) return;
     setFinishing(true);
     setDone(true);
     window.setTimeout(onComplete, 650);
-  }, [finishing, onComplete]);
+  }, [finishing, assetsReady, onComplete]);
+
+  const completeSequence = useCallback(() => {
+    setSequenceDone(true);
+  }, []);
 
   const armedCountRef = useRef(0);
 
@@ -465,7 +479,7 @@ export function BootSplash({ onComplete }: { onComplete: () => void }) {
       if (finishing) return;
 
       if (index >= sequence.length) {
-        window.setTimeout(finish, 480);
+        window.setTimeout(completeSequence, 480);
         return;
       }
 
@@ -479,8 +493,15 @@ export function BootSplash({ onComplete }: { onComplete: () => void }) {
 
       timerRef.current = window.setTimeout(() => scheduleNext(index + 1), wait);
     },
-    [finishing, finish, sequence, triggerSideEffects],
+    [finishing, completeSequence, sequence, triggerSideEffects],
   );
+
+  useEffect(() => {
+    if (!sequenceDone || finishing || !assetsReady) return;
+    setFinishing(true);
+    setDone(true);
+    window.setTimeout(onComplete, 650);
+  }, [sequenceDone, assetsReady, finishing, onComplete]);
 
   useEffect(() => {
     scheduleNext(0);
@@ -494,17 +515,24 @@ export function BootSplash({ onComplete }: { onComplete: () => void }) {
   }, [scheduleNext]);
 
   useEffect(() => {
-    const pct = Math.min(100, Math.floor((lineIndex / sequence.length) * 100));
-    setBootPct(pct);
+    const animPct = Math.min(100, Math.floor((lineIndex / sequence.length) * 100));
 
-    if (pct < 20) setBootStatus("COLD POST...");
-    else if (pct < 35) setBootStatus("RF SPECTRUM SCAN...");
-    else if (pct < 50) setBootStatus("GRIDSYS HANDSHAKE...");
-    else if (pct < 70) setBootStatus("ZONE MAP SYNC...");
-    else if (pct < 85) setBootStatus("TOPO CACHE LOAD...");
-    else if (pct < 100) setBootStatus("GZ-01 READY...");
+    if (sequenceDone && !assetsReady) {
+      setBootPct(95);
+      setBootStatus("TOPO CACHE LOAD...");
+      return;
+    }
+
+    setBootPct(assetsReady ? animPct : Math.min(animPct, 92));
+
+    if (animPct < 20) setBootStatus("COLD POST...");
+    else if (animPct < 35) setBootStatus("RF SPECTRUM SCAN...");
+    else if (animPct < 50) setBootStatus("GRIDSYS HANDSHAKE...");
+    else if (animPct < 70) setBootStatus("ZONE MAP SYNC...");
+    else if (animPct < 85) setBootStatus("TOPO CACHE LOAD...");
+    else if (animPct < 100) setBootStatus("GZ-01 READY...");
     else setBootStatus("SEQUENCE COMPLETE");
-  }, [lineIndex, sequence.length]);
+  }, [lineIndex, sequence.length, sequenceDone, assetsReady]);
 
   useEffect(() => {
     for (const ref of [leftRef, rightRef]) {
@@ -545,6 +573,10 @@ export function BootSplash({ onComplete }: { onComplete: () => void }) {
       className={`boot-splash font-mono ${done ? "boot-splash-done" : ""}`}
       onClick={() => skipEnabled && !finishing && finish()}
     >
+      <div className="boot-lang-wrap">
+        <LangToggle className="lang-toggle lang-toggle-boot" />
+      </div>
+
       <div className="boot-glitch-band" aria-hidden="true" />
 
       <div className="boot-terminal-wrap">
